@@ -5,7 +5,7 @@ CREATE TABLE demo.previous_employees_by_job_title (
     employee_id uuid,
     employee_name text,
     first_day timestamp,
-    last_day timestamp
+    last_day timestamp,
     PRIMARY KEY (job_title, employee_id)
 ) WITH CLUSTERING ORDER BY (employee_id ASC);
 
