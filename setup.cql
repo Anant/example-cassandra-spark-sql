@@ -16,3 +16,5 @@ CREATE TABLE demo.days_worked_by_previous_employees_by_job_title (
     number_of_days_worked int,
     PRIMARY KEY (job_title, employee_id)
 ) WITH CLUSTERING ORDER BY (employee_id ASC);
+
+COPY demo.previous_employees_by_job_title from '/example-cassandra-spark-sql/previous_employees_by_job_title.csv' WITH HEADER = TRUE ;
