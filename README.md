@@ -109,17 +109,28 @@ TRUNCATE TABLE demo.days_worked_by_previous_employees_by_job_title ;
 
 ## 6. Basic Cassandra Data Operations with Spark SQL (Source File to Cassandra)
 
-### 6.1 - Load CSV data to df
+### 6.1 - Restart Spark Shell
+```bash
+./bin/spark-shell --packages com.datastax.spark:spark-cassandra-connector_2.12:3.0.0 \
+--master spark://arpans-mbp.lan:7077 \
+--conf spark.cassandra.connection.host=127.0.0.1 \
+--conf spark.cassandra.connection.port=9042 \
+--conf spark.sql.extensions=com.datastax.spark.connector.CassandraSparkExtensions \
+--conf spark.sql.catalog.cassandra=com.datastax.spark.connector.datasource.CassandraCatalog \
+--files /path/to/example-cassandra-spark-sql/previous_employees_by_job_title.csv 
+```
+
+### 6.2 - Load CSV data to df
 ```bash
 val csv_df = spark.read.format("csv").option("header", "true").load("/path/to/example-cassandra-spark-sql/previous_employees_by_job_title.csv")
 ```
 
-### 6.2 - Create temp view to use Spark SQL
+### 6.3 - Create temp view to use Spark SQL
 ```bash
 csv_df.createOrReplaceTempView("source")
 ```
 
-### 6.3 - Write into Cassandra table using Spark SQL
+### 6.4 - Write into Cassandra table using Spark SQL
 ```bash
 spark.sql("INSERT INTO cassandra.demo.previous_employees_by_job_title SELECT * from source")
 ```
