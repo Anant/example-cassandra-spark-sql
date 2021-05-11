@@ -30,3 +30,96 @@ docker exec -it cassandra cqlsh
 ```bash
 source '/example-cassandra-spark-sql/setup.cql'
 ```
+
+## 2. Start Spark Shell
+
+### 2.1 - Navigate to Spark directory and start in standalone cluster mode
+```bash
+./sbin/start-master.sh
+```
+
+### 2.2 - Start worker and point it at the master
+You can find your Spark master URL at `localhost:8080`
+```bash
+./sbin/start-slave.sh <master-url>
+```
+
+### 2.3 - Start Spark Shell
+```bash
+./bin/spark-shell --packages com.datastax.spark:spark-cassandra-connector_2.12:3.0.0 \
+--master <spark-master-url> \
+--conf spark.cassandra.connection.host=127.0.0.1 \
+--conf spark.cassandra.connection.port=9042 \
+--conf spark.sql.extensions=com.datastax.spark.connector.CassandraSparkExtensions \
+--conf spark.sql.catalog.cassandra=com.datastax.spark.connector.datasource.CassandraCatalog
+```
+
+## 3. Basic Cassandra Schema Commands
+We will cover some basic Cassandra Schema commands we can do with Spark SQL. More can this can be found [here](https://github.com/datastax/spark-cassandra-connector/blob/42937e1ed01dd5aefb37fea38dbafc49ed44250e/doc/14_data_frames.md#supported-schema-commands)
+
+### 3.1 - Create Table
+```bash
+spark.sql("CREATE TABLE cassandra.demo.testTable (key_1 Int, key_2 Int, key_3 Int, cc1 STRING, cc2 String, cc3 String, value String) USING cassandra PARTITIONED BY (key_1, key_2, key_3) TBLPROPERTIES (clustering_key='cc1.asc, cc2.desc, cc3.asc', compaction='{class=SizeTieredCompactionStrategy,bucket_high=1001}')")
+```
+
+### 3.2 - Alter Table
+```bash
+spark.sql("ALTER TABLE cassandra.demo.testTable ADD COLUMNS (newCol INT)")
+```
+```bash
+spark.sql("describe table cassandra.demo.testTable").show
+```
+
+### 3.3 - Drop Table
+```bash
+spark.sql("DROP TABLE cassandra.demo.testTable")
+```
+```bash
+spark.sql("SHOW TABLES from cassandra.demo").show
+```
+
+## 4. Basic Cassandra Data Operations with Spark SQL (Cassandra to Cassandra)
+
+### 4.1 - Read
+Perform a basic read
+```bash
+spark.sql("SELECT * from cassandra.demo.previous_employees_by_job_title").show
+```
+
+### 4.2 - Write
+Write data to a table from another table and use SQL functions
+```bash
+spark.sql("INSERT INTO cassandra.demo.days_worked_by_previous_employees_by_job_title SELECT job_title, employee_id, employee_name, abs(datediff(last_day, first_day)) as number_of_days_worked from cassandra.demo.previous_employees_by_job_title")
+```
+
+### 4.3 - Joins
+Join data from two tables together
+```bash
+
+```
+
+## 5. Truncate tables with `CQLSH`
+
+```bash
+TRUNCATE TABLE demo.previous_employees_by_job_title ; 
+```
+```bash
+TRUNCATE TABLE demo.days_worked_by_previous_employees_by_job_title ; 
+```
+
+## 6. Basic Cassandra Data Operations with Spark SQL (Source File to Cassandra)
+
+### 6.1 - Load CSV data to df
+```bash
+val csv_df = spark.read.format("csv").option("header", "true").load("/path/to/example-cassandra-spark-sql/previous_employees_by_job_title.csv")
+```
+
+### 6.2 - Create temp view to use Spark SQL
+```bash
+csv_df.createOrReplaceTempView("source")
+```
+
+### 6.3 - Write into Cassandra table using Spark SQL
+```bash
+spark.sql("INSERT INTO cassandra.demo.previous_employees_by_job_title SELECT * from source")
+```
