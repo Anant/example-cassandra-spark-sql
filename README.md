@@ -139,3 +139,11 @@ csv_df.createOrReplaceTempView("source")
 ```bash
 spark.sql("INSERT INTO cassandra.demo.previous_employees_by_job_title SELECT * from source")
 ```
+
+And that will wrap up the walkthrough on using Spark SQL for basic Cassandra Data Operations. If you want to watch a live recording of the walkthrough, be sure to check out the YouTube video linked below!
+
+## Resources
+- [Accompanying Blog]()
+- [Accompanying YouTube]()
+- https://github.com/datastax/spark-cassandra-connector
+- https://docs.datastax.com/en/dse/6.8/dse-dev/datastax_enterprise/spark/sparkSqlSupportedSyntax.html
