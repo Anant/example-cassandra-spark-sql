@@ -95,7 +95,12 @@ spark.sql("INSERT INTO cassandra.demo.days_worked_by_previous_employees_by_job_t
 ### 4.3 - Joins
 Join data from two tables together
 ```bash
-
+spark.sql("""
+SELECT cassandra.demo.previous_employees_by_job_title.job_title, cassandra.demo.previous_employees_by_job_title.employee_name, cassandra.demo.previous_employees_by_job_title.first_day, cassandra.demo.previous_employees_by_job_title.last_day, cassandra.demo.days_worked_by_previous_employees_by_job_title.number_of_days_worked 
+FROM cassandra.demo.previous_employees_by_job_title 
+LEFT JOIN cassandra.demo.days_worked_by_previous_employees_by_job_title ON cassandra.demo.previous_employees_by_job_title.employee_id=cassandra.demo.days_worked_by_previous_employees_by_job_title.employee_id 
+WHERE cassandra.demo.days_worked_by_previous_employees_by_job_title.job_title='Dentist'
+""").show
 ```
 
 ## 5. Truncate tables with `CQLSH`
